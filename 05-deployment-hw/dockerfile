@@ -1,0 +1,25 @@
+# Base image with model and vectorizer
+FROM svizor/zoomcamp-model:3.11.5-slim
+
+# Set the working directory
+WORKDIR /app
+
+# Install pipenv
+RUN pip install pipenv
+
+# Copy Pipfile and Pipfile.lock to the container
+COPY Pipfile Pipfile.lock ./
+
+# Install dependencies using pipenv
+RUN pipenv install --deploy --ignore-pipfile
+
+# Copy your Flask application script into the container
+COPY app.py .
+
+# Expose the port
+EXPOSE 9696
+
+# Command to run the Flask application with Gunicorn
+COPY ["model1.bin", "dv.bin", "./"]
+CMD ["pipenv", "run", "gunicorn", "-b", "0.0.0.0:9696", "app:app"]
+
