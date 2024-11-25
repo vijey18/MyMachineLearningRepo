@@ -1,0 +1,24 @@
+# Use an official Python base image
+FROM python:3.12-slim
+
+# Set the working directory
+WORKDIR /app
+
+# Install pipenv
+RUN pip install pipenv
+
+# Copy project files
+COPY Pipfile Pipfile.lock ./
+COPY app.py ./app.py
+COPY xgboost_apple_quality_model.pkl ./xgboost_apple_quality_model.pkl
+
+
+# Explicitly install scikit-learn version 1.4.2
+RUN pipenv install --system --deploy && \
+    pip install scikit-learn==1.4.2
+
+# Expose the Flask port
+EXPOSE 5000
+
+# Run the Flask app
+CMD ["python", "app.py"]

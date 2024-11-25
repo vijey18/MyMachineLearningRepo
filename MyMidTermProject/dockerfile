@@ -1,24 +1,27 @@
-# Use an official Python base image
+# Use an official Python runtime as the base image
 FROM python:3.12-slim
 
 # Set the working directory
 WORKDIR /app
 
-# Install pipenv
+# Install pipenv for dependency management
 RUN pip install pipenv
 
-# Copy project files
+# Copy Pipfile and Pipfile.lock
 COPY Pipfile Pipfile.lock ./
-COPY app.py ./app.py
-COPY xgboost_apple_quality_model.pkl ./xgboost_apple_quality_model.pkl
 
+# Install Python dependencies system-wide
+RUN pipenv install --deploy --system
 
-# Explicitly install scikit-learn version 1.4.2
-RUN pipenv install --system --deploy && \
-    pip install scikit-learn==1.4.2
+# Copy the application files and training script
+COPY scripts/app.py ./app.py
+COPY scripts/XgBoost.py ./XgBoost.py
+COPY data/apple_quality.csv ./apple_quality.csv
+# Train the model to create the pickle file
+RUN python XgBoost.py
 
 # Expose the Flask port
 EXPOSE 5000
 
-# Run the Flask app
-CMD ["python", "app.py"]
+# Run the application using Gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]

@@ -15,7 +15,7 @@ from xgboost import XGBClassifier
 from sklearn.model_selection import GridSearchCV
 
 # Load the data
-df = pd.read_csv(".data/apple_quality.csv")
+df = pd.read_csv("./apple_quality.csv")
 
 # Preprocessing
 df.columns = df.columns.str.lower()
@@ -98,14 +98,14 @@ print("Classification Report:\n", classification_report(y_test, y_test_pred))
 # In[2]:
 
 
-#pickle this xgboost model 
+#pickle this xgboost model with the best parameters
 import pickle
 
 # Save the pipeline (preprocessing + trained model) using pickle
 with open('xgboost_apple_quality_model.pkl', 'wb') as file:
-    pickle.dump(xgboost_pipeline, file)
+    pickle.dump(best_model, file)
 
-print("The trained pipeline has been saved as 'xgboost_apple_quality_model.pkl'")
+print("The best tuned pipeline has been saved as 'xgboost_apple_quality_model.pkl'")
 
 # In[ ]:
 

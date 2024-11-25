@@ -10,6 +10,9 @@ This project contains a Flask application for predicting apple quality using an 
 -  The data analysis and initial modelling are in the file named DataAnalysis.ipynb
 -  Linear Regression details are in the LinearRegression notebook.
 -  XgBoost details are in the XgBoost notebook.
+- The scripts folder contain the .py version of the notebooks used. Please note that the docker in contructed to use the pickled model coming of of Xgboost modelling on the training data.
+- The notebook folder contains the notebooks that was used to model and perform EDA on the training data.
+
 
 ## How to Use
 1. Clone the repository named `MyMidTermProject`
@@ -23,10 +26,12 @@ curl -X POST -H "Content-Type: application/json" -d '{"features": [-3.970049,-2.
 
 
 ## File Structure
-- `app.py`: Flask application code.
+- `app.py`: Flask application code in the scripts folder
+- `XgBoost.py`: The python script that trains on the training data and outputs the best model to a pickle file
 - `Dockerfile`: Docker configuration for containerization.
 - `xgboost_apple_quality_model.pkl`: Pretrained XGBoost model.
 
   ## What could have been done
 - I wanted to try and implement the front end predict endpoint using  streamlit but could not implement due to my work schedule.
+- I could have better implemented the output of the curl to give a simple representation of the apple quality as good/bad in addition to the prediction and the corresponding probabilities.
   

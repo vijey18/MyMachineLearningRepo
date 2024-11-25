@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-%matplotlib inline
+#%matplotlib inline
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.metrics import mean_squared_error
@@ -21,7 +21,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import precision_score, roc_auc_score
 from sklearn.metrics import f1_score
 
-df = pd.read_csv("./data/apple_quality.csv")
+df = pd.read_csv("../data/apple_quality.csv")
 df.head()
 
 df .columns = df.columns.str.lower()
@@ -228,28 +228,22 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.preprocessing import StandardScaler, PolynomialFeatures
-from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, roc_auc_score, f1_score
 import pickle
 
 # Load the data
-df = pd.read_csv("./data/apple_quality.csv")
+df = pd.read_csv("../data/apple_quality.csv")
 
 # Drop unnecessary columns
-df .columns = df.columns.str.lower()
+df.columns = df.columns.str.lower()
 df = df.dropna()
-
-df.drop('a_id',axis=1,inplace=True)
-#df.columns
+df.drop('a_id', axis=1, inplace=True)
 df['acidity'] = df['acidity'].astype('float')
 
-
-quality_mapping = {
-    "good":1,
-    "bad":0
-}
+# Map 'good' and 'bad' to 1 and 0
+quality_mapping = {"good": 1, "bad": 0}
 df['quality'] = df['quality'].map(quality_mapping)
 
 # Define features and target variable
@@ -260,41 +254,23 @@ y = df['quality']
 X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.4, random_state=1)
 X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=1)
 
-# Set up feature engineering pipeline
-num_features = X.columns  # Assuming all features are numerical except for 'a_id'
+# Set up feature engineering pipeline with scaling and polynomial features
 final_pipeline = Pipeline([
     ('scaler', StandardScaler()),
-    ('poly_features', PolynomialFeatures(degree=2, include_bias=False))
-    ])
+    ('poly_features', PolynomialFeatures(degree=2, include_bias=False)),
+    ('log_reg', LogisticRegression(C=0.01, max_iter=1000, penalty='l2', solver='lbfgs'))
+])
 
-
-
-# Fit the train data and transform the valiation and test data
-X_train_transformed = final_pipeline.fit_transform(X_train)
-X_val_transformed = final_pipeline.transform(X_val)
-X_test_transformed = final_pipeline.transform(X_test)
-#X_val_transformed = final_pipeline.named_steps['scaler'].transform(X_val)
-#X_test_transformed = final_pipeline.named_steps['scaler'].transform(X_test)
-
-# Train logistic regression model on the transformed data
-log_reg = LogisticRegression(C=0.01,max_iter=1000,penalty='l2',solver='lbfgs')
-log_reg.fit(X_train_transformed, y_train)
-
-# Perform cross-validation on the training set
-#scorer = make_scorer(f1_score)  # Use F1-score as the evaluation metric
-#cv_scores = cross_val_score(final_pipeline, X_train_transformed, y_train, cv=5, scoring=scorer, n_jobs=-1)
+# Train and transform the train, validation, and test data
+final_pipeline.fit(X_train, y_train)
 
 # Evaluate on validation set
-y_val_pred = log_reg.predict(X_val_transformed)
-y_val_pred_proba = log_reg.predict_proba(X_val_transformed)[:, 1]
+y_val_pred = final_pipeline.predict(X_val)
+y_val_pred_proba = final_pipeline.predict_proba(X_val)[:, 1]
 
 # Evaluate on test set
-y_test_pred = log_reg.predict(X_test_transformed)
-y_test_pred_proba = log_reg.predict_proba(X_test_transformed)[:, 1]
-
-# Cross-validation results
-#print("Cross-Validation F1 Scores:", cv_scores)
-#print("Mean Cross-Validation F1 Score:", np.mean(cv_scores))
+y_test_pred = final_pipeline.predict(X_test)
+y_test_pred_proba = final_pipeline.predict_proba(X_test)[:, 1]
 
 # Print evaluation metrics for validation data
 print("\nValidation Results:")
@@ -304,27 +280,15 @@ print("Classification Report:\n", classification_report(y_val, y_val_pred))
 
 # Print evaluation metrics for test data
 print("\nTest Results:")
-print("Validation F1 Score:", f1_score(y_test, y_test_pred))
-print("Validation AUC-ROC:", roc_auc_score(y_test, y_test_pred_proba))
+print("Test F1 Score:", f1_score(y_test, y_test_pred))
+print("Test AUC-ROC:", roc_auc_score(y_test, y_test_pred_proba))
 print("Classification Report:\n", classification_report(y_test, y_test_pred))
 
-#pickle the model with the best F1-Score and AUC-ROC score
-
-# Define the pipeline with scaling and polynomial features
-#final_pipeline = Pipeline([
-#    ('scaler', StandardScaler()),
-#    ('poly_features', PolynomialFeatures(degree=2, include_bias=False)),
-#    ('log_reg', LogisticRegression((c=0.01,max_iter=1000,penalty='l2',solver='lbfgs'))
-#])
-
-# Train the pipeline on the entire training dataset
-#final_pipeline.fit(X_train_transformed, y_train)
-
-# Save the pipeline (model + preprocessing) using pickle
+# Save the entire pipeline (scaling, polynomial features, and logistic regression model)
 with open('lr_apple_quality_model.pkl', 'wb') as file:
     pickle.dump(final_pipeline, file)
 
-print("The best model has been saved to 'lr_apple_quality_model.pkl'")
+print("The entire pipeline has been saved as 'lr_apple_quality_model.pkl'")
 
 # In[8]:
 
