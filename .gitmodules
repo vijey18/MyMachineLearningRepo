@@ -1,0 +1,3 @@
+[submodule "Flight-Price-Prediction"]
+	path = Flight-Price-Prediction
+	url = https://github.com/vijey18/MyMachineLearningRepo.git
