@@ -1,0 +1,41 @@
+# Use an official Python 3.9-slim image as the base image
+FROM python:3.9-slim
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Install conda
+RUN apt-get update && apt-get install -y wget bzip2 \
+    && wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh \
+    && bash miniconda.sh -b -f -p /opt/conda \
+    && rm miniconda.sh \
+    && /opt/conda/bin/conda init bash
+
+# Add conda to the PATH
+ENV PATH /opt/conda/bin:$PATH
+
+# Create and activate the conda environment
+RUN conda create --name grape-prediction-env python=3.9 -y
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy the application files to the container
+COPY app.py /app
+COPY requirements.txt /app
+COPY optimized_combined_model.pkl /app
+
+# Install system dependencies (optional but recommended for building some dependencies)
+RUN apt-get update && apt-get install -y build-essential unzip
+
+# Install pip and set a clean version
+RUN pip install --upgrade pip
+
+# Install the required Python libraries into the conda environment
+RUN /bin/bash -c "source /opt/conda/bin/activate grape-prediction-env && pip install -r requirements.txt"
+
+# Expose the port that Streamlit will run on (default: 8501)
+EXPOSE 8501
+
+# Set the command to run the Streamlit app when the container starts
+CMD ["bash", "-c", "source /opt/conda/bin/activate grape-prediction-env && streamlit run app.py --server.port=8501 --server.address=0.0.0.0"]

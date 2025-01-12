@@ -1,0 +1,26 @@
+# Use an official Python 3.9 image as the base image
+FROM python:3.9-slim
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy the application files to the container
+COPY app.py /app
+COPY requirements.txt /app
+COPY optimized_combined_model.pkl /app
+
+
+# Install system dependencies (optional but recommended for building some dependencies)
+RUN apt-get update && apt-get install -y unzip
+
+# Install pip and set a clean version
+RUN pip install --upgrade pip
+
+# Install the required Python libraries
+RUN pip install -r requirements.txt
+
+# Expose the port that Streamlit will run on (default: 8501)
+EXPOSE 8501
+
+# Set the command to run the Streamlit app when the container starts
+CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]

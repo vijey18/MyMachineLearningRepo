@@ -4,9 +4,7 @@
 import os
 import subprocess
 import zipfile
-import shutil
 from sklearn.pipeline import Pipeline
-
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.impute import SimpleImputer
@@ -15,8 +13,6 @@ from sklearn.model_selection import train_test_split, GridSearchCV
 import pandas as pd
 import joblib
 
-target_folder = '../streamlit-app/'
-model_filename = 'optimized_combined_model.pkl'
 # Combined Gradient Boosting Class
 class CombinedGradientBoosting:
     def __init__(self, classification_model, regression_model):
@@ -179,10 +175,6 @@ def main():
     # Save the pipeline
     joblib.dump(optimized_model, 'optimized_combined_model.pkl')
     print("Optimized model saved successfully!")
-
-    # Copy the saved model to the 'streamlit-app' folder
-    shutil.copy(model_filename, os.path.join(target_folder, model_filename))
-    print(f"Model copied to {target_folder} folder successfully!")
 
 # Entry point
 if __name__ == "__main__":
